@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Budget Helper</title>
+<style>
+:root{--ink:#17143c;--muted:#77758f;--purple:#5736d7;--purple2:#8060ed;--line:#e9e5fb;--bg:#f7f6ff;--green:#15965d;--orange:#f5a623}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink)}
+.app{min-height:100vh;display:grid;grid-template-columns:245px 1fr}
+.sidebar{background:#211d4b;color:white;padding:25px 16px;display:flex;flex-direction:column;gap:25px}
+.brand{padding:8px 12px}.cap{font-size:38px}.brand h2{font-size:21px;line-height:1.15;margin:8px 0}.brand p{margin:0;color:#c9c4ef;font-size:13px}
+nav{display:grid;gap:8px}nav a{color:#e7e4ff;text-decoration:none;padding:13px 14px;border-radius:13px;font-weight:600}nav a.active,nav a:hover{background:linear-gradient(110deg,#6845e5,#7956ed)}
+.motto{margin-top:auto;background:#37316d;border-radius:16px;padding:18px;text-align:center;color:#e9e5ff}.motto strong{display:block;font-size:15px;margin-top:8px}
+main{padding:30px;max-width:1500px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:24px}.top h1{font-size:29px;margin:0 0 5px}.sub{color:var(--muted);margin:0}.month{border:1px solid var(--line);background:white;padding:11px 15px;border-radius:30px;color:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 4px 15px #34218a08}.metric{min-height:125px}.metric .label{color:var(--muted);font-size:14px}.metric .value{font-size:29px;font-weight:800;margin-top:10px}.metric .symbol{font-size:23px;margin-right:8px}.budget{background:#eee9ff}.spent{background:#e6f8f1}.remaining{background:#e7f7ef}.warning{background:#fff1df}.warning .value{font-size:19px}
+.progress{height:10px;border-radius:20px;background:#e9e3dc;overflow:hidden;margin-top:13px}.progress span{display:block;height:100%;background:var(--orange);border-radius:20px;width:0}
+.layout{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;margin-bottom:18px}.card h2{font-size:19px;margin:0 0 18px}.breakdown{display:flex;align-items:center;gap:25px;flex-wrap:wrap}.donut{width:180px;height:180px;border-radius:50%;background:conic-gradient(#f6a623 0 35%,#4b9df4 35% 58%,#3cc58d 58% 75%,#7956ed 75% 88%,#9b9ac8 88% 100%);display:grid;place-items:center;flex-shrink:0}.donut:after{content:"";width:112px;height:112px;background:white;border-radius:50%;grid-area:1/1}.donut-label{z-index:1;grid-area:1/1;text-align:center;font-weight:800;font-size:20px}.donut-label small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.legend{display:grid;gap:12px;flex:1;min-width:180px}.legend-row{display:flex;align-items:center;gap:9px;font-size:14px}.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}.legend-row b{margin-left:auto}
+.alert{background:#f0ebff;border-color:#e2d9ff}.alert p{color:#514c75;line-height:1.5}.alert strong{color:#4d2bc8}.btn{border:0;border-radius:11px;background:var(--purple);color:white;padding:11px 16px;font-weight:700;cursor:pointer}.btn:hover{background:#4325bb}.btn.secondary{background:#eeeaff;color:#4e31c2}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.expenses{display:grid;gap:0}.expense{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #f0eef8}.expense:last-child{border:0}.emoji{font-size:22px}.expense-info{flex:1}.expense-info small{display:block;color:var(--muted);margin-top:3px}.amount{font-weight:750}.delete{border:0;background:transparent;color:#e35b6b;font-size:18px;cursor:pointer;padding:5px}
+.forms{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:grid;gap:6px}.field label{font-size:13px;color:var(--muted);font-weight:650}.field input,.field select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:white;font:inherit;color:var(--ink)}.field.full{grid-column:1/-1}
+.goalbar{height:10px;background:#eee9ff;border-radius:20px;overflow:hidden;margin:14px 0}.goalbar span{height:100%;display:block;background:var(--purple2);width:0}.muted{color:var(--muted);font-size:13px}.empty{color:var(--muted);padding:20px 0;text-align:center}
+footer{text-align:center;color:#9995b3;font-size:12px;padding:18px}
+@media(max-width:1050px){.cards{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr 1fr}}
+@media(max-width:720px){.app{display:block}.sidebar{padding:12px 14px;gap:10px}.brand{display:flex;align-items:center;gap:10px;padding:4px}.cap{font-size:26px}.brand h2{font-size:16px;margin:0}.brand p{display:none}nav{display:flex;overflow-x:auto;gap:5px}nav a{white-space:nowrap;padding:9px 12px;font-size:13px}.motto{display:none}main{padding:20px 14px}.top{align-items:flex-start}.top h1{font-size:23px}.month{font-size:12px;padding:9px}.cards{gap:9px}.metric{padding:14px;min-height:105px}.metric .value{font-size:23px}.metric .label{font-size:12px}.layout{grid-template-columns:1fr}.breakdown{justify-content:center}.donut{width:155px;height:155px}.donut:after{width:96px;height:96px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="cap">🎓</div><div><h2>Student Budget<br>Helper</h2><p>Plan · Track · Save</p></div></div>
+  <nav><a class="active" href="#dashboard">⌂ &nbsp; Dashboard</a><a href="#add">＋ &nbsp; Add expense</a><a href="#reports">▥ &nbsp; Reports</a><a href="#savings">◎ &nbsp; Savings goal</a></nav>
+  <div class="motto">🏆<strong>Small steps,<br>great savings!</strong></div>
+</aside>
+<main id="dashboard">
+  <div class="top"><div><h1>Welcome, Student! 👋</h1><p class="sub">Here's your budget overview for this month.</p></div><div class="month" id="monthLabel"></div></div>
+  <section class="cards">
+    <div class="card metric budget"><div class="label">💜 Monthly budget</div><div class="value" id="budgetValue">₹5,000</div></div>
+    <div class="card metric spent"><div class="label">💚 Spent so far</div><div class="value" id="spentValue">₹0</div></div>
+    <div class="card metric remaining"><div class="label">✅ Remaining</div><div class="value" id="remainingValue">₹5,000</div></div>
+    <div class="card metric warning"><div class="label">⚠️ Budget used</div><div class="value" id="percentValue">0%</div><div class="progress"><span id="budgetProgress"></span></div></div>
+  </section>
+  <section class="layout">
+    <div class="card" id="reports"><h2>◔ Spending breakdown</h2><div class="breakdown"><div class="donut" id="donut"><div class="donut-label" id="donutTotal">₹0<small>Total spent</small></div></div><div class="legend" id="legend"></div></div></div>
+    <div class="card alert"><h2>🔔 Budget check</h2><p id="alertText">You're doing well. Add your expenses to see your budget insights.</p><p class="muted" id="dailyAllowance"></p><button class="btn" onclick="document.querySelector('#add').scrollIntoView({behavior:'smooth'})">＋ Add an expense</button></div>
+  </section>
+  <section class="layout">
+    <div class="card"><div class="row"><h2>Recent expenses</h2><span class="muted" id="expenseCount">0 entries</span></div><div class="expenses" id="expenseList"><div class="empty">No expenses yet. Add your first one!</div></div></div>
+    <div class="card" id="savings"><h2>🎯 Savings goal</h2><div class="field"><label for="goalInput">What are you saving for?</label><input id="goalName" placeholder="e.g. New headphones"></div><div class="forms" style="margin-top:10px"><div class="field"><label for="goalInput">Target amount (₹)</label><input id="goalInput" type="number" min="1" placeholder="2000"></div><div class="field"><label for="savedInput">Already saved (₹)</label><input id="savedInput" type="number" min="0" placeholder="0"></div></div><button class="btn" style="margin-top:12px" onclick="saveGoal()">Save goal</button><div class="goalbar"><span id="goalProgress"></span></div><div class="row muted"><span id="goalSummary">Set a goal to start saving.</span><strong id="goalPercent"></strong></div></div>
+  </section>
+  <section class="layout">
+    <div class="card" id="add"><h2>＋ Add an expense</h2><form id="expenseForm" class="forms"><div class="field full"><label for="expenseTitle">Expense name</label><input id="expenseTitle" required maxlength="45" placeholder="e.g. Lunch at college"></div><div class="field"><label for="expenseAmount">Amount (₹)</label><input id="expenseAmount" type="number" min="1" step="0.01" required placeholder="120"></div><div class="field"><label for="expenseCategory">Category</label><select id="expenseCategory"><option>Food</option><option>Travel</option><option>Books</option><option>Shopping</option><option>Fees</option><option>Other</option></select></div><div class="field"><label for="expenseDate">Date</label><input id="expenseDate" type="date" required></div><div class="field" style="align-self:end"><button class="btn" type="submit">Add expense</button></div></form></div>
+    <div class="card"><h2>🧮 Can I afford this?</h2><p class="muted">Check how a planned purchase affects your remaining budget.</p><div class="field"><label for="purchaseInput">Planned purchase (₹)</label><input id="purchaseInput" type="number" min="0" step="0.01" placeholder="e.g. 500" oninput="checkPurchase()"></div><p id="purchaseResult" aria-live="polite">Enter an amount to check.</p></div>
+  </section>
+  <div class="card"><div class="row"><div><h2 style="margin-bottom:4px">Monthly budget settings</h2><p class="muted" style="margin:0">Choose how much money you have this month.</p></div></div><div class="row" style="margin-top:12px;justify-content:flex-start;flex-wrap:wrap"><input id="budgetInput" type="number" min="1" placeholder="Enter budget (₹)" style="padding:11px;border:1px solid var(--line);border-radius:10px;max-width:220px"><button class="btn" onclick="saveBudget()">Update budget</button></div></div>
+  <footer>Your data stays in this browser on this device. This prototype does not connect to a bank account.</footer>
+</main>
+</div>
+<script>
+const KEY='studentBudgetHelper_v1';
+const defaults={budget:5000,expenses:[],goal:{name:'',target:0,saved:0}};
+let data;
+try{data={...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')};data.goal={...defaults.goal,...(data.goal||{})};if(!Array.isArray(data.expenses))data.expenses=[];}catch{data={...defaults};}
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+const categories={Food:{emoji:'🍔',color:'#f6a623'},Travel:{emoji:'🚌',color:'#4b9df4'},Books:{emoji:'📚',color:'#3cc58d'},Shopping:{emoji:'🛍️',color:'#7956ed'},Fees:{emoji:'🎓',color:'#ef7c9a'},Other:{emoji:'📦',color:'#9b9ac8'}};
+function persist(){localStorage.setItem(KEY,JSON.stringify(data));}
+function monthKey(d){return d.slice(0,7);}
+function currentExpenses(){const now=new Date();const key=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');return data.expenses.filter(e=>monthKey(e.date)===key);}
+function render(){
+ const now=new Date();document.getElementById('monthLabel').textContent=now.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+ const expenses=currentExpenses(),spent=expenses.reduce((s,e)=>s+Number(e.amount),0),remaining=data.budget-spent,pct=data.budget>0?spent/data.budget*100:0;
+ document.getElementById('budgetValue').textContent=money(data.budget);document.getElementById('spentValue').textContent=money(spent);document.getElementById('remainingValue').textContent=money(remaining);document.getElementById('percentValue').textContent=Math.round(pct)+'%';document.getElementById('budgetProgress').style.width=Math.min(100,pct)+'%';document.getElementById('budgetInput').value=data.budget;
+ document.getElementById('donutTotal').innerHTML=money(spent)+'<small>Total spent</small>';
+ const totals={};expenses.forEach(e=>totals[e.category]=(totals[e.category]||0)+Number(e.amount));
+ let start=0,stops=[];Object.keys(categories).forEach(c=>{const value=totals[c]||0;if(value){const end=start+(spent?value/spent*100:0);stops.push(`${categories[c].color} ${start}% ${end}%`);start=end;}});
+ document.getElementById('donut').style.background=spent?'conic-gradient('+stops.join(',')+')':'conic-gradient(#e9e5f5 0 100%)';
+ document.getElementById('legend').innerHTML=Object.keys(categories).filter(c=>totals[c]).map(c=>`<div class="legend-row"><span class="dot" style="background:${categories[c].color}"></span>${categories[c].emoji} ${c}<b>${money(totals[c])}</b></div>`).join('')||'<span class="muted">Your categories will appear here.</span>';
+ const alert=document.getElementById('alertText');alert.textContent=pct>=100?'You have reached or exceeded your monthly budget. Pause non-essential spending.':pct>=80?`You have used ${Math.round(pct)}% of your budget. Be careful with the remaining money.`:`You've used ${Math.round(pct)}% of your budget. ${remaining>=0?'Keep tracking and stay on plan!':'Your budget has been exceeded.'}`;
+ const day=now.getDate(),days=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),allowance=Math.max(0,remaining)/(days-day+1);document.getElementById('dailyAllowance').textContent=`Suggested daily allowance for the rest of this month: ${money(allowance)}`;
+ const sorted=[...expenses].sort((a,b)=>b.date.localeCompare(a.date)||b.created-b.created);document.getElementById('expenseCount').textContent=expenses.length+' entries';
+ document.getElementById('expenseList').innerHTML=sorted.length?sorted.map(e=>`<div class="expense"><span class="emoji">${categories[e.category]?.emoji||'📦'}</span><div class="expense-info">${escapeHTML(e.title)}<small>${new Date(e.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})} · ${e.category}</small></div><span class="amount">${money(e.amount)}</span><button class="delete" aria-label="Delete ${escapeHTML(e.title)}" onclick="deleteExpense('${e.id}')">✕</button></div>`).join(''):'<div class="empty">No expenses this month. Add your first one!</div>';
+ document.getElementById('goalName').value=data.goal.name;document.getElementById('goalInput').value=data.goal.target||'';document.getElementById('savedInput').value=data.goal.saved||'';
+ const gp=data.goal.target?Math.min(100,data.goal.saved/data.goal.target*100):0;document.getElementById('goalProgress').style.width=gp+'%';document.getElementById('goalSummary').textContent=data.goal.target?`${money(data.goal.saved)} saved of ${money(data.goal.target)}`:'Set a goal to start saving.';document.getElementById('goalPercent').textContent=data.goal.target?Math.round(gp)+'%':'';
+ checkPurchase();
+}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+document.getElementById('expenseDate').value=new Date().toISOString().slice(0,10);
+document.getElementById('expenseForm').addEventListener('submit',e=>{e.preventDefault();const title=document.getElementById('expenseTitle').value.trim(),amount=Number(document.getElementById('expenseAmount').value),date=document.getElementById('expenseDate').value,category=document.getElementById('expenseCategory').value;if(!title||!Number.isFinite(amount)||amount<=0||!date)return;data.expenses.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),title,amount,date,category,created:Date.now()});persist();e.target.reset();document.getElementById('expenseDate').value=new Date().toISOString().slice(0,10);render();});
+function deleteExpense(id){if(confirm('Delete this expense?')){data.expenses=data.expenses.filter(e=>e.id!==id);persist();render();}}
+function saveBudget(){const n=Number(document.getElementById('budgetInput').value);if(!Number.isFinite(n)||n<=0){alert('Enter a budget greater than zero.');return;}data.budget=n;persist();render();}
+function saveGoal(){const name=document.getElementById('goalName').value.trim(),target=Number(document.getElementById('goalInput').value),saved=Number(document.getElementById('savedInput').value);if(!Number.isFinite(target)||target<=0||!Number.isFinite(saved)||saved<0){alert('Enter a target above zero and a saved amount of zero or more.');return;}data.goal={name,target,saved};persist();render();}
+function checkPurchase(){const input=document.getElementById('purchaseInput'),out=document.getElementById('purchaseResult');if(!input||!input.value){if(out)out.textContent='Enter an amount to check.';return;}const amount=Number(input.value),spent=currentExpenses().reduce((s,e)=>s+Number(e.amount),0),remaining=data.budget-spent;if(!Number.isFinite(amount)||amount<0){out.textContent='Enter a valid amount.';return;}out.textContent=amount<=remaining?`This fits your current budget. You would have ${money(remaining-amount)} left.`:`This is over your remaining budget by ${money(amount-remaining)}. Consider waiting or choosing a cheaper option.`;}
+render();
+</script>
+</body>
+</html>
